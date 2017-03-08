@@ -1,0 +1,10 @@
+HTTP/1.1 201 Created
+Date: Wed, 08 Mar 2017 19:39:20 GMT
+Content-Type: application/json
+Location: http://api.gbif.org/occurrence/download/request/0067951-160910150852091
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: HEAD, GET, POST, DELETE, PUT
+Connection: close
+Server: Jetty(9.2.z-SNAPSHOT)
+
+0067951-160910150852091

@@ -1,0 +1,61 @@
+###README FOR GBIF HPC SETUP###
+##This software was written by:
+#####Robert S. Harbert#########
+#####rharbert@amnh.org#########
+##Direct all questions here####
+
+###License: Creative Commons -- Attribution-ShareAlike 4.0 International
+##https://creativecommons.org/licenses/by-sa/4.0/legalcode
+##If you like this softare please feel free to use, copy, and modify this software, but please cite this repository as the original source.
+##If you modify this code and use it as your own please continue to carry a similar open licensing policy.
+
+###Goals of this software:
+#Make it as simple as possible to set up a SQLized mirror of the GBIF database.
+#Speed up data access for big projects with database index searches on commonly searched columns. Performance 
+#	increases of several orders of magnitude possible.
+
+#Interact with the GBIF API behind the scenes for updates and preservation of the user's sanity.
+
+#Request a download of all georeferenced GBIF data. Get and process these data.
+
+
+#FORMAT NOTES:
+#The most used fields will be built into a single SQL table that optimizes search performance on
+#	taxonomy and geographic fields. This is primarily accomplished by
+# 	partitioning the table by the first letter of the genus field and then indexing on the most searched fields #	(genus, species, latitude, longitude).
+
+#All other downloaded data are maintained in a very large, slow table that preserves all available fields. 
+#The gbif_ID is indexed there for reasonable performance on single, specific records so extra metadata should be #	accessible.
+
+#MAINTENANCE:
+#After initial setup we will use cron to schedule a script to run and get regular updates from GBIF
+
+
+###GETTING STARTED
+##TO run the perl scripts associated with this pipeline please install these libraries from CPAN
+DBI
+DBD::mysql
+JSON
+
+##Request the complete georeferenced download from the GBIF API
+##RUN:
+./REQUEST_DL.sh
+
+
+##AFTER you get the email notification (THE PREPARATION OF THE DOWNLOAD CAN TAKE UPWARDS OF 12 hours)
+##RUN:
+./GET_DOWN.sh
+
+#Also expect this to take alot of time. However, the script runs the download in the background so you don't have to stay logged in to the server the whole time. 
+#The download is expected to be about 110GB as of January, 2017. 
+
+##When the download is complete (consult with wget-log and monitor the network usage).
+##RUN:
+./SETUP.sh
+#enter your MySQL (or MariaDB) credentials at the prompt
+
+
+##Schedule 
+#crontab -e
+###WRITE CRON LINE (NOTE THAT THE PATH ASSUMES gbif_HPC is in your user directory)
+#0 0 * * * perl ~/gbif_HPC/bin/gbif_update.pl

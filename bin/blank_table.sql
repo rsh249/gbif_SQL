@@ -1,0 +1,110 @@
+--
+-- Table structure for table `div_base`
+--
+
+DROP TABLE IF EXISTS `div_base`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `div_base` (
+  `div_id` int(11) NOT NULL AUTO_INCREMENT,
+  `occurrenceID` varchar(128) DEFAULT NULL,
+  `ownerInstitutionCode` varchar(255) DEFAULT NULL,
+  `collectionCode` varchar(255) DEFAULT NULL,
+  `catalogNumber` varchar(128) DEFAULT NULL,
+  `basisOfRecord` varchar(128) DEFAULT NULL,
+  `taxonConceptKey` mediumint(8) unsigned DEFAULT NULL,
+  `taxon_str` varchar(255) DEFAULT NULL,
+  `family` varchar(64) DEFAULT NULL,
+  `order` varchar(64) DEFAULT NULL,
+  `genus` varchar(128) NOT NULL DEFAULT '',
+  `species` varchar(128) DEFAULT NULL,
+  `subspecies` varchar(128) DEFAULT NULL,
+  `infraspecificEpithet` varchar(128) DEFAULT NULL,
+  `variety` varchar(128) DEFAULT NULL,
+  `authority` varchar(128) DEFAULT NULL,
+  `lat` varchar(64) DEFAULT NULL,
+  `lon` varchar(64) DEFAULT NULL,
+  `coordinatePrecision` varchar(32) DEFAULT NULL,
+  `locality` varchar(255) DEFAULT NULL,
+  `municipality` varchar(64) DEFAULT NULL,
+  `county` varchar(128) DEFAULT NULL,
+  `stateProvince` varchar(128) DEFAULT NULL,
+  `countryCode` varchar(128) DEFAULT NULL,
+  `continent` varchar(128) DEFAULT NULL,
+  `elevation` varchar(32) DEFAULT NULL,
+  `elevAccuracy` varchar(16) DEFAULT NULL,
+  `year` varchar(16) DEFAULT NULL,
+  `month` varchar(16) DEFAULT NULL,
+  `day` varchar(128) DEFAULT NULL,
+  `recordBy` varchar(128) DEFAULT NULL,
+  `identifiedBy` varchar(128) DEFAULT NULL,
+  `intitutionID` varchar(64) DEFAULT NULL,
+  `creator` varchar(64) DEFAULT NULL,
+  `description` text,
+  `collector_number` varchar(64) DEFAULT NULL,
+  `is_correct_name` int(11) DEFAULT NULL,
+  `is_bad` tinyint(3) unsigned DEFAULT NULL,
+  `is_virtual` tinyint(3) unsigned DEFAULT NULL,
+  `is_ambiguous` tinyint(3) unsigned DEFAULT NULL,
+  `is_fossil` tinyint(3) unsigned DEFAULT NULL,
+  `is_public` tinyint(3) unsigned DEFAULT NULL,
+  `hasGeospatialIssues` tinyint(3) unsigned DEFAULT NULL,
+  `cultivated` tinyint(3) unsigned DEFAULT NULL,
+  `no_precision` tinyint(3) unsigned DEFAULT NULL,
+  `needs_review` tinyint(3) unsigned DEFAULT NULL,
+  `created` varchar(128) DEFAULT NULL,
+  `modified` varchar(128) DEFAULT NULL,
+  `orig_genus` varchar(64) DEFAULT NULL,
+  `orig_species` varchar(64) DEFAULT NULL,
+  `source_id` varchar(64) DEFAULT NULL,
+  `source_table` varchar(64) DEFAULT NULL,
+  PRIMARY KEY (`div_id`, `genus`),
+  KEY `B` (`genus`,`species`),
+  KEY `C` (`is_bad`),
+  KEY `D` (`is_virtual`),
+  KEY `E` (`is_ambiguous`),
+  KEY `F` (`is_public`),
+  KEY `G` (`needs_review`),
+  KEY `H` (`no_precision`),
+  KEY `I` (`cultivated`),
+  KEY `L` (`is_fossil`),
+  KEY `short_lat` (`lat`(4)),
+  KEY `short_lon` (`lon`(4))
+) ENGINE=MyISAM DEFAULT CHARSET=latin1
+/*!50500 PARTITION BY RANGE  COLUMNS(genus)
+(PARTITION p0 VALUES LESS THAN ('a') ENGINE = MyISAM,
+ PARTITION p1 VALUES LESS THAN ('b') ENGINE = MyISAM,
+ PARTITION p2 VALUES LESS THAN ('c') ENGINE = MyISAM,
+ PARTITION p3 VALUES LESS THAN ('d') ENGINE = MyISAM,
+ PARTITION p4 VALUES LESS THAN ('e') ENGINE = MyISAM,
+ PARTITION p5 VALUES LESS THAN ('f') ENGINE = MyISAM,
+ PARTITION p6 VALUES LESS THAN ('g') ENGINE = MyISAM,
+ PARTITION p7 VALUES LESS THAN ('h') ENGINE = MyISAM,
+ PARTITION p8 VALUES LESS THAN ('i') ENGINE = MyISAM,
+ PARTITION p9 VALUES LESS THAN ('j') ENGINE = MyISAM,
+ PARTITION p10 VALUES LESS THAN ('k') ENGINE = MyISAM,
+ PARTITION p11 VALUES LESS THAN ('l') ENGINE = MyISAM,
+ PARTITION p12 VALUES LESS THAN ('m') ENGINE = MyISAM,
+ PARTITION p13 VALUES LESS THAN ('n') ENGINE = MyISAM,
+ PARTITION p14 VALUES LESS THAN ('o') ENGINE = MyISAM,
+ PARTITION p15 VALUES LESS THAN ('p') ENGINE = MyISAM,
+ PARTITION p16 VALUES LESS THAN ('q') ENGINE = MyISAM,
+ PARTITION p17 VALUES LESS THAN ('r') ENGINE = MyISAM,
+ PARTITION p18 VALUES LESS THAN ('s') ENGINE = MyISAM,
+ PARTITION p19 VALUES LESS THAN ('t') ENGINE = MyISAM,
+ PARTITION p20 VALUES LESS THAN ('u') ENGINE = MyISAM,
+ PARTITION p21 VALUES LESS THAN ('v') ENGINE = MyISAM,
+ PARTITION p22 VALUES LESS THAN ('w') ENGINE = MyISAM,
+ PARTITION p23 VALUES LESS THAN ('x') ENGINE = MyISAM,
+ PARTITION p24 VALUES LESS THAN ('y') ENGINE = MyISAM,
+ PARTITION p25 VALUES LESS THAN ('z') ENGINE = MyISAM,
+ PARTITION p26 VALUES LESS THAN (MAXVALUE) ENGINE = MyISAM) */;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `div_base`
+--
+
+LOCK TABLES `div_base` WRITE;
+/*!40000 ALTER TABLE `div_base` DISABLE KEYS */;
+/*!40000 ALTER TABLE `div_base` ENABLE KEYS */;
