@@ -38,8 +38,8 @@ DBD::mysql
 JSON
 
 ##Request the complete georeferenced download from the GBIF API
-##RUN:
-./REQUEST_DL.sh
+##RUN: #NOTE ALL ARGUMENTS MUST APPEAR WITHOUT QUOTES. If using a local SQL server use localhost
+./REQUEST_DL.sh sql_username sql_password sql_host sql_database
 
 
 ##AFTER you get the email notification (THE PREPARATION OF THE DOWNLOAD CAN TAKE UPWARDS OF 12 hours)

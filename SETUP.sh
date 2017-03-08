@@ -4,18 +4,10 @@
 #Prompt the user for SQL login info from the command line
 pwd=$(echo $PWD)
 
-
-
-
-echo -n "Enter your sql user name and press [ENTER]: "
-read us
-echo -n "Enter your sql password and press [ENTER]: "
-read pa
-echo -n "Enter the hostname or IP for sql server (usually localhost) [ENTER]:"
-read h
-echo -n "Enter your database name [ENTER]: "
-read db
-
+us=$1
+pa=$2
+h=$3
+db=$4
 
 
 #Check for downloaded GBIF archive. It should be placed in the same directory as SETUP.sh. IF does not exist then exit with message for user.
