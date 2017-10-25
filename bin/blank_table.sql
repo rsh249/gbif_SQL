@@ -6,7 +6,7 @@ DROP TABLE IF EXISTS `div_base`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `div_base` (
-  `div_id` int(11) NOT NULL AUTO_INCREMENT,
+  `div_id` int(11) NOT NULL,
   `occurrenceID` varchar(128) DEFAULT NULL,
   `ownerInstitutionCode` varchar(255) DEFAULT NULL,
   `collectionCode` varchar(255) DEFAULT NULL,
@@ -15,15 +15,15 @@ CREATE TABLE `div_base` (
   `taxonConceptKey` mediumint(8) unsigned DEFAULT NULL,
   `taxon_str` varchar(255) DEFAULT NULL,
   `family` varchar(64) DEFAULT NULL,
-  `order` varchar(64) DEFAULT NULL,
+  `orde` varchar(64) DEFAULT NULL,
   `genus` varchar(128) NOT NULL DEFAULT '',
   `species` varchar(128) DEFAULT NULL,
   `subspecies` varchar(128) DEFAULT NULL,
   `infraspecificEpithet` varchar(128) DEFAULT NULL,
   `variety` varchar(128) DEFAULT NULL,
   `authority` varchar(128) DEFAULT NULL,
-  `lat` varchar(64) DEFAULT NULL,
-  `lon` varchar(64) DEFAULT NULL,
+  `lat` DECIMAL(14,10) DEFAULT NULL,
+  `lon` DECIMAL(14,10) DEFAULT NULL,
   `coordinatePrecision` varchar(32) DEFAULT NULL,
   `locality` varchar(255) DEFAULT NULL,
   `municipality` varchar(64) DEFAULT NULL,
@@ -58,8 +58,12 @@ CREATE TABLE `div_base` (
   `orig_species` varchar(64) DEFAULT NULL,
   `source_id` varchar(64) DEFAULT NULL,
   `source_table` varchar(64) DEFAULT NULL,
-  PRIMARY KEY (`div_id`, `genus`),
+  PRIMARY KEY (`div_id`,`genus`),
+  KEY `cou` (`countryCode`),
+  KEY `cont` (`continent`),
   KEY `B` (`genus`,`species`),
+  KEY `fam` (`family`),
+  KEY `ord` (`orde`),
   KEY `C` (`is_bad`),
   KEY `D` (`is_virtual`),
   KEY `E` (`is_ambiguous`),
@@ -68,8 +72,10 @@ CREATE TABLE `div_base` (
   KEY `H` (`no_precision`),
   KEY `I` (`cultivated`),
   KEY `L` (`is_fossil`),
-  KEY `short_lat` (`lat`(4)),
-  KEY `short_lon` (`lon`(4))
+  KEY `geo` (`hasGeospatialIssues`),
+  KEY `lat` (`lat`),
+  KEY `lon` (`lon`)
+
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1
 /*!50500 PARTITION BY RANGE  COLUMNS(genus)
 (PARTITION p0 VALUES LESS THAN ('a') ENGINE = MyISAM,

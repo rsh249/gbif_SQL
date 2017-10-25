@@ -1,13 +1,15 @@
 #!/usr/bin/perl
+
 use DBI;
 use DBD::mysql;
 use Cwd;
 use POSIX;
- 
+
 #-- get current directory
 my $pwd = cwd();
 my $today = strftime('%Y-%m-%d', localtime);
-
+#print "$pwd\n";
+#print "$today\n";
 
 
 $main = $ARGV[0];
@@ -51,12 +53,15 @@ for (my $ff = 0; $ff<=$#fastfields; $ff++){
 	if($fastfields[$ff] eq 'div_id'){
 		$fastfields[$ff] = 'gbifID';
 	}
-
+	if($fastfields[$ff] eq 'orde'){
+		$fastfields[$ff] = 'order';
+	}
 }
 
 
 $c = 0;
 $d = 0;
+#$n = 0;
 $n = 0;
 $n = open_new($n); 
 
@@ -101,7 +106,7 @@ while (<MYFILE>) {
 		}
 		
 	} elsif ($c>= 1) {
-
+	#} elsif ($c>= 5406*100000){	
 		my @ne = split(/\t/, $_);
 
 		for(my $xx = 0; $xx<=$#ne; $xx++){

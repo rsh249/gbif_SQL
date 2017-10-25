@@ -1,5 +1,16 @@
 #!/bin/bash   
-pwd=$(echo $PWD)
+
+
+##This software was written by:
+#####Robert S. Harbert#########
+#####rharbert@amnh.org#########
+##Direct all questions here####'
+
+## SCRIPT TO ASK GBIF REQUEST API TO PREPARE A DWCA ZIP FILE FOR DOWNLOAD ##
+
+#pwd=$(echo $PBS_O_WORKDIR) #if working under PBS Scheduler
+pwd=$(echo $PWD) #if working directly
+
 
 
 ## Set up request for download

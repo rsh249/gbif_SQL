@@ -1,13 +1,21 @@
 #!/usr/bin/perl
 use Cwd;
 use JSON;
-use Data::Dumper;
+#use Data::Dumper;
 use LWP::UserAgent;
 use DBI;
+use Parallel::ForkManager;
 use open ':std', ':encoding(UTF-8)';
 use POSIX;
 #Mysql setup
-my $pwd = cwd();
+my $pwd = cwd(); 
+my $pbs_dir =  $ENV{'PBS_O_WORKDIR'};
+print "$pwd\n$pbs_dir\n"; 
+#my $pwd = $pbs_dir;
+
+
+
+
 my $today = strftime('%Y-%m-%d', localtime);
 #print "$today\n"; exit;
 open my $file, '<', "$pwd/last_update_date"; 
@@ -40,39 +48,119 @@ for (my $ff = 0; $ff<=$#fastfields; $ff++){
 	if($fastfields[$ff] eq 'div_id'){
 		$fastfields[$ff] = 'gbifID';
 	}
+	if($fastfiels[$ff] eq 'orde'){
+		$fastfields[$ff] = 'order';
+	}
 
 }
 
 
-######
-$upper_date = "3000-01-01"; #hard code this and it will work for the next 983 years
+#####
 
-#read update_log_file
-#should contain one line with lower date
-#$lower_date = '2017-03-07'; #Get from the LOG file or BASH INPUT
+my $forks = 4;
+my $pm = Parallel::ForkManager->new($forks);
+
+$pm->run_on_finish( sub {
+    my ($pid, $exit_code, $ident, $exit_signal, $core_dump, $data_structure_reference) = @_;
+    my $q = $data_structure_reference->{input};
+    $results{$q} = $data_structure_reference->{result};
+});
+
+
+##START LOOP HERE
+#for each month 1:2
 $limit = 300; #This is the maximum
 $offset = 0; #MUST iterate through this until the endOfRecords tag comes back = 1 instead of =0;
-	# $offset = $offset +300; #each iteration
-$count = 301; #Get count from the results object and reset. Then check in while
-$endOfRecords=0;
-$num_dl = 0;
+	# $offset = $offset +300; #each iteration But cannot be more than 200000
+#$count = 301; #Get count from the results object and reset. Then check in while
+#$endOfRecords=0;
+#$num_dl = 0;
 $version = 'v1';
+$finalmonth = substr($today, -5, 2);
+$finalday = substr($today, -2, 2); print "END AT: $finalday of $finalmonth\n";
+$finalday = $finalday - 1;
+	$lastmonth = substr($lower_date, -5, 2);
+	print "last update month = $lastmonth\n";
+	#for each day since last update day
+	$lastday = substr($lower_date, -2, 2); print "DAY: $lower_date : $lastday : $lastmonth\n";
+
+	$upper_date = $lower_date;
+	print "$lastday | $finalday && $lastmonth | $finalmonth\n";
+while (($lastday < $finalday && $lastmonth == $finalmonth) | ($lastmonth < $finalmonth)) {
+	
+	$last_upper_date = $upper_date;
+	$lastday++;
+	if($lastday > 30){ 
+		$lastmonth++;
+	}
+	$lastday = sprintf("%02d", $lastday);
+	$upper_date =~ s/..$/$lastday/; 
+	print "$last_upper_date : $upper_date\n"; 
+
+
+	for (my $month = 1; $month <= 12; $month++){
+		
+		#$query = "https://api.gbif.org/$version/occurrence/search?lastInterpreted=$last_upper_date,$upper_date&limit=$limit&offset=$offset&month=$month&hasGeospatialIssue=FALSE&hasCoordinate=TRUE";
+		#print "$query\n";
+
+		#pass $last_upper_date, $upper_date, $limit, $offset, $month
+
+		my $pid = $pm->start and next; ##START CLUSTER
+ 		my $res = fetch_and_load($version, $last_upper_date, $upper_date, $limit, $offset, $month);
+  		$pm->finish(0, { result => $res, input => $last_upper_date }); #END CLUSTER
+
+
+
+
+
+
+
+
+	}
+	
+} 
+mysql_ext_disconnect();
+
+
+
+#open (datefile, ">$pwd/last_update_date");
+#print datefile "$today\n";
+#close (datefile);
+
+exit;
+
+
+sub fetch_and_load($$) {
+
+	my ($v, $lu, $u, $lim, $off, $m) = @_;
+my $endOfRecords=0;
+my $num_dl = 0;
+my $count =0;
+
 @fields = ();
 
 $xxx = 0;
-my $file = "$pwd/update/gbif_master.txt";
-my $filefast = "$pwd/update/fast.txt";
+
+my $file = "$pwd/update/gbif_master$m.txt";
+my $filefast = "$pwd/update/fast$m.txt";
+my $logfile = "$pwd/update/update$m.log";
 
 open (OUT, ">$file");
 open (OUTFAST, ">$filefast");
 
-
 while($endOfRecords == 0){
-	$jstext = get_http_page("https://api.gbif.org/$version/occurrence/search?lastInterpreted=$lower_date,$upper_date&limit=$limit&offset=$offset");
-
-	my $student = decode_json $jstext;
-
-#print($student{'results'}[0]{'month'}); exit;
+#while($num_dl < 
+	$q = "https://api.gbif.org/$v/occurrence/search?lastInterpreted=$lu,$u&limit=$lim&offset=$off&month=$m&hasGeospatialIssue=FALSE&hasCoordinate=TRUE";
+	print "$q\n";
+	
+	$jstext = get_http_page($q);
+	
+	#print "Downloaded: $num_dl\n";
+	my $student = eval { decode_json $jstext } ;
+	unless($student){
+		$off = $off+$lim;
+		break;
+	}
 
 	my @v = values $student;  
 	my @k = keys   $student;
@@ -179,7 +267,7 @@ while($endOfRecords == 0){
 	$count = $student->{'count'};
 	$endOfRecords = $student->{'endOfRecords'};
 	$num_dl = $num_dl + $downloaded;
-	$offset = $offset+$limit;
+	$off = $off+$lim;
 	#print "\n\n$limit\n$count\n$num_dl\n$endOfRecords\n$offset\n$downloaded\n";
 	@fields = uniq(@fields);
 	
@@ -187,8 +275,12 @@ while($endOfRecords == 0){
 
 	####
 	#print "Number of fields; $#fields\n";
-	print "Count is: $num_dl/$count\n";
-	print "Callback #: $xxx\n";
+	open (LOG, ">>$logfile");
+	select((select(LOG), $|=1)[0]);
+	print LOG "Count is: $num_dl/$count\n";
+	print LOG "Callback #: $xxx\n";
+	print LOG "Query is: $q\n";
+	close (LOG);
 	$xxx++;
 
 }
@@ -197,28 +289,28 @@ close(OUT);
 close(OUTFAST);
 print "Writing SQL batch files...\n";
 
-open (SQLOUT, ">$pwd/update.bat");
+open (SQLOUT, ">$pwd/update$m.bat");
 print SQLOUT "use $db;\n";
-print SQLOUT "alter table gbif_master DISABLE KEYS;\n";
-print SQLOUT "LOAD DATA LOCAL INFILE '$pwd/update/gbif_master.txt' REPLACE INTO TABLE gbif_master;\n";
-print SQLOUT "alter table gbif_master ENABLE KEYS;\n";
+#print SQLOUT "alter table gbif_master DISABLE KEYS;\n";
+print SQLOUT "LOAD DATA LOCAL INFILE '$pwd/update/gbif_master$m.txt' REPLACE INTO TABLE gbif_master;\n";
+#print SQLOUT "alter table gbif_master ENABLE KEYS;\n";
 close(SQLOUT);
-system("mysql -u$sql_user -p$sql_pw -h$sql_h < $pwd/update.bat");
+system("mysql -u$sql_user -p$sql_pw -h$sql_h < $pwd/update$m.bat");
 
-open (SQLOUTFAST, ">$pwd/updatefast.bat");
+open (SQLOUTFAST, ">$pwd/updatefast$m.bat");
 print SQLOUTFAST "use $db;\n";
-print SQLOUTFAST "alter table div_base DISABLE KEYS;\n";
-print SQLOUTFAST "LOAD DATA LOCAL INFILE '$pwd/update/fast.txt' REPLACE INTO TABLE div_base;\n";
-print SQLOUTFAST "alter table div_base ENABLE KEYS;\n";
+#print SQLOUTFAST "alter table div_base DISABLE KEYS;\n";
+print SQLOUTFAST "LOAD DATA LOCAL INFILE '$pwd/update/fast$m.txt' REPLACE INTO TABLE div_base;\n";
+#print SQLOUTFAST "alter table div_base ENABLE KEYS;\n";
 close(SQLOUTFAST);
-system("mysql -u$sql_user -p$sql_pw -h$sql_h < $pwd/updatefast.bat");
+system("mysql -u$sql_user -p$sql_pw -h$sql_h < $pwd/updatefast$m.bat");
 
-open (datefile, ">$pwd/last_update_date");
-print datefile "$today\n";
-close (datefile);
 
-exit;
 
+
+	return ($num_dl);
+
+}
 
 sub uniq($$) {
     my %seen;

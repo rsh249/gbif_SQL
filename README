@@ -10,7 +10,7 @@
 ##If you modify this code and use it as your own please continue to carry a similar open licensing policy.
 
 ###Goals of this software:
-#Make it as simple as possible to set up a SQLized mirror of the GBIF database.
+1) Make it as simple as possible to set up a SQL mirror of the GBIF database.
 #Speed up data access for big projects with database index searches on commonly searched columns. Performance 
 #	increases of several orders of magnitude possible.
 
@@ -27,8 +27,6 @@
 #All other downloaded data are maintained in a very large, slow table that preserves all available fields. 
 #The gbif_ID is indexed there for reasonable performance on single, specific records so extra metadata should be #	accessible.
 
-#MAINTENANCE:
-#After initial setup we will use cron to schedule a script to run and get regular updates from GBIF
 
 
 ###GETTING STARTED
@@ -51,11 +49,11 @@ JSON
 
 ##When the download is complete (consult with wget-log and monitor the network usage).
 ##RUN:
-./SETUP.sh
-#enter your MySQL (or MariaDB) credentials at the prompt
+./SETUP.sh sql_user sql_pw sql_h db_name
+
 
 
 ##Schedule 
 #crontab -e
 ###WRITE CRON LINE (NOTE THAT THE PATH ASSUMES gbif_HPC is in your user directory)
-#0 0 * * * perl ~/gbif_HPC/bin/gbif_update.pl
+#0 0 * * * perl ~/gbif_HPC/bin/gbif_update.pl sql_user sql_pw sql_h db_name
